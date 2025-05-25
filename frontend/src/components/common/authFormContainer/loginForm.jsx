@@ -64,13 +64,13 @@ const LoginForm = ({ setFormType }) => {
                         </div>
                     </div>
 
-                    <div className="auth-form-aside">
+                    {/* <div className="auth-form-aside">
                         <div className="auth-form__help">
                             <button onClick={() => setFormType('forgotPassword')} className="auth-form__help-link auth-form__forgot">
                                 Quên mật khẩu
                             </button>
                         </div>
-                    </div>
+                    </div> */}
 
                     <div className="auth-form__controls">
                         <button type="submit" className="btn btn-primary login-btn">ĐĂNG NHẬP</button>

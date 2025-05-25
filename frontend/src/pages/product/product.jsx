@@ -1,6 +1,6 @@
 import React from 'react'
 import Footer from '../../components/layout/footer/footer'
-import ProductCart from './productCart/productCart';
+import ProductCard from './productCart/productCard';
 import Header from '../../components/layout/header/header';
 import { useLocation } from 'react-router-dom';
 
@@ -11,7 +11,7 @@ const Product = () => {
     return (
         <>
             <Header />
-            <ProductCart product={product} />
+            <ProductCard product={product} />
             <Footer />
         </>
     );

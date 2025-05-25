@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CartItem from './cartItem/cartItem';
 import './cartSection.css';
 import axiosClient from '../../../api/axiosClient';
 
 const CartSection = () => {
+    const navigate = useNavigate();
     const [cartItems, setCartItems] = useState([]);
     const [checked, setChecked] = useState([]);
 
@@ -82,6 +84,21 @@ const CartSection = () => {
         }
     };
 
+    const handleCheckout = () => {
+        const selectedItems = cartItems.filter((_, index) => checked[index]);
+        if (selectedItems.length === 0) {
+            alert('Vui lòng chọn sản phẩm để thanh toán');
+            return;
+        }
+
+        navigate('/pay', {
+            state: {
+                items: selectedItems,
+                totalAmount: totalPrice
+            }
+        });
+    };
+
     // Tính tổng tiền và số sản phẩm đã chọn
     const totalChecked = checked.filter(Boolean).length;
     const totalPrice = cartItems.reduce((sum, item, idx) => {
@@ -145,10 +162,19 @@ const CartSection = () => {
 
                         <div className="cart__checkout-group">
                             <div className="cart__summary">
-                                <span className="cart__total-price--text">Tổng cộng ({totalChecked} Sản phẩm):</span>
-                                <span className="cart__total-price">{totalPrice.toLocaleString()}₫</span>
+                                <span className="cart__total-price--text">
+                                    Tổng cộng ({totalChecked} Sản phẩm):
+                                </span>
+                                <span className="cart__total-price">
+                                    {totalPrice.toLocaleString()}₫
+                                </span>
                             </div>
-                            <button className="cart__checkout btn btn-primary">Mua Hàng</button>
+                            <button
+                                className="cart__checkout btn btn-primary"
+                                onClick={handleCheckout}
+                            >
+                                Mua Hàng
+                            </button>
                         </div>
                     </div>
                 </div>

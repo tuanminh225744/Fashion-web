@@ -1,8 +1,11 @@
 import React from 'react'
-import './productCart.css'
+import './productCard.css'
 import axiosClient from '../../../api/axiosClient'
+import { useNavigate } from 'react-router-dom';
 
-function ProductCart({ product }) {
+function ProductCard({ product }) {
+    const navigate = useNavigate();
+
     // Nếu không có product (truy cập trực tiếp), có thể hiển thị thông báo hoặc redirect
     if (!product) {
         return <div>Không tìm thấy sản phẩm.</div>;
@@ -14,10 +17,25 @@ function ProductCart({ product }) {
         try {
             const response = await axiosClient.post(`/them_vao_gio_hang?san_phamid=${product.id}`);
             alert('Thêm vào giỏ hàng thành công!');
+            window.location.reload()
         } catch (error) {
             console.error('Lỗi khi thêm vào giỏ hàng:', error);
             alert('Thêm vào giỏ hàng thất bại!');
         }
+    };
+
+    const handleBuyNow = () => {
+        const purchaseItem = {
+            ...product,
+            soLuong: 1
+        };
+
+        navigate('/pay', {
+            state: {
+                items: [purchaseItem],
+                totalAmount: product.gia
+            }
+        });
     };
 
     return (
@@ -53,7 +71,12 @@ function ProductCart({ product }) {
                                     >
                                         Thêm Vào Giỏ Hàng
                                     </button>
-                                    <button className="btn product__btn--buy">Mua Ngay</button>
+                                    <button
+                                        className="btn product__btn--buy"
+                                        onClick={handleBuyNow}
+                                    >
+                                        Mua Ngay
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -67,4 +90,4 @@ function ProductCart({ product }) {
     )
 }
 
-export default ProductCart
+export default ProductCard

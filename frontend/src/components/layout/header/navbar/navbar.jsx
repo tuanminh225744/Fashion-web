@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import './navbar.css';
 import { useSelector } from "react-redux";
+import store from '../../../../redux/store';
 import { useEffect } from "react";
 import axiosClient from "../../../../api/axiosClient";
 
@@ -32,8 +33,8 @@ const Navbar = () => {
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('token'); // Xóa token
-        navigate('/login'); // Chuyển về trang login
+        store.dispatch({ type: 'LOGOUT' }); // Dispatch logout action
+        navigate('/login');
     };
 
     return (

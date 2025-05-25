@@ -54,6 +54,12 @@ const authSlice = createSlice({
         removeToken: (state) => {
             state.token = null;
         },
+
+        // Logout
+        LOGOUT: (state) => {
+            state.token = null;
+            localStorage.removeItem('token');
+        },
     },
 });
 
@@ -66,6 +72,7 @@ export const {
     registerFailure,
     setToken,
     removeToken,
+    LOGOUT,
 } = authSlice.actions;
 
 export default authSlice.reducer;

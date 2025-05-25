@@ -134,11 +134,7 @@ const UserProfile = () => {
                     </div>
                 </form>
 
-                <div className="form-right">
-                    <img src={userInfo.avatar} alt="Avatar" className="avatar" />
-                    <button className="choose-btn">Chọn Ảnh</button>
-                    <p>Dung lượng file tối đa 1 MB<br />Định dạng: .JPEG, .PNG</p>
-                </div>
+
             </div>
         </div>
     );

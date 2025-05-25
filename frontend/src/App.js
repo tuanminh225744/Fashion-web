@@ -12,6 +12,8 @@ import VerifySignIn from './pages/verify/verifySignIn.jsx';
 import UserOrders from './pages/order/userOrders.jsx';
 import ChangePassword from './pages/changePassword/changePassword.jsx';
 import Pay from './pages/pay/pay.jsx';
+import Search from './pages/search/search';
+
 function App() {
 
 
@@ -31,6 +33,7 @@ function App() {
           <Route path="/orders" element={<UserOrders />} />
           <Route path="/changePassword" element={<ChangePassword />} />
           <Route path="/pay" element={<Pay />} />
+          <Route path="/search" element={<Search />} />
         </Routes>
       </Router>
     </div>

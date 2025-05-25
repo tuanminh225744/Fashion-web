@@ -13,13 +13,30 @@ const axiosClient = axios.create({
     },
 });
 
-// Gắn token nếu có
+// Interceptor để xử lý request
 axiosClient.interceptors.request.use((config) => {
     const token = store.getState().auth.token; // Lấy token từ Redux store
+
+    // Nếu data là FormData, đổi Content-Type
+    if (config.data instanceof FormData) {
+        config.headers['Content-Type'] = 'multipart/form-data';
+    }
+
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
 });
+
+// Thêm interceptor để xử lý response
+axiosClient.interceptors.response.use(
+    (response) => {
+        return response;
+    },
+    (error) => {
+        console.error('API Error:', error);
+        return Promise.reject(error);
+    }
+);
 
 export default axiosClient;
