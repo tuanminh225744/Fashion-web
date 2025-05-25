@@ -11,6 +11,7 @@ function PaySection() {
         phone: '',
         address: ''
     });
+    const [discounts, setDiscounts] = useState({});
 
     // Fetch thông tin người dùng khi component mount
     useEffect(() => {
@@ -27,6 +28,31 @@ function PaySection() {
         };
         fetchUserInfo();
     }, []);
+
+    // Add new effect to fetch discounts
+    useEffect(() => {
+        const fetchDiscounts = async () => {
+            try {
+                const discountPromises = orderItems.map(item =>
+                    axiosClient.get(`/maDuocChon?danhmuc_id=${item.danhMucID}`)
+                );
+                const responses = await Promise.all(discountPromises);
+
+                const discountMap = {};
+                responses.forEach((response, index) => {
+                    if (response.data) {
+                        discountMap[orderItems[index].danhMucID] = response.data;
+                    }
+                });
+                setDiscounts(discountMap);
+            } catch (error) {
+                console.error('Lỗi khi lấy mã giảm giá:', error);
+            }
+        };
+        if (orderItems.length > 0) {
+            fetchDiscounts();
+        }
+    }, [orderItems]);
 
     const handleSubmitOrder = async () => {
         try {
@@ -75,8 +101,19 @@ function PaySection() {
         }));
     };
 
+    const calculateDiscountedPrice = (item) => {
+        const discount = discounts[item.danhMucID];
+        if (discount && new Date(discount.ngayHetHan) > new Date() && discount.soLuotConLai > 0) {
+            return item.gia * (1 - discount.phanTramGiamGia / 100);
+        }
+        return item.gia;
+    };
+
     const calculateTotal = () => {
-        return orderItems.reduce((sum, item) => sum + (item.gia * item.soLuong), 0);
+        return orderItems.reduce((sum, item) => {
+            const discountedPrice = calculateDiscountedPrice(item);
+            return sum + (discountedPrice * item.soLuong);
+        }, 0);
     };
 
     return (
@@ -130,9 +167,30 @@ function PaySection() {
                                             <div className="product-details">
 
                                                 <div className="product-name">{item.tenSanPham}</div>
+                                                {discounts[item.danhMucID] && (
+                                                    <div className="discount-info">
+                                                        <span className="discount-code">
+                                                            Mã: {discounts[item.danhMucID].ma}
+                                                        </span>
+                                                        <span className="discount-percent">
+                                                            -{discounts[item.danhMucID].phanTramGiamGia}%
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
                                         </td>
-                                        <td>{item.gia?.toLocaleString()}₫</td>
+                                        <td>
+                                            <div className="price-container">
+                                                <span className="original-price">
+                                                    {item.gia.toLocaleString()}₫
+                                                </span>
+                                                {discounts[item.danhMucID] && (
+                                                    <span className="discounted-price">
+                                                        {calculateDiscountedPrice(item).toLocaleString()}₫
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
                                         <td>
                                             <div className="quantity-control">
                                                 <button
@@ -150,7 +208,9 @@ function PaySection() {
                                                 </button>
                                             </div>
                                         </td>
-                                        <td>{(item.gia * item.soLuong).toLocaleString()}₫</td>
+                                        <td>
+                                            {(calculateDiscountedPrice(item) * item.soLuong).toLocaleString()}₫
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

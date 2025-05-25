@@ -5,6 +5,7 @@ import './orderCard.css';
 const OrderCard = ({ orderId, trangThaiDonHang, nhanHang }) => {
     const [orderDetails, setOrderDetails] = useState(null);
     const [productDetails, setProductDetails] = useState([]);
+    const [discounts, setDiscounts] = useState({});
 
     const getOrderStatus = () => {
         if (nhanHang) return 'HOAN_THANH';
@@ -12,31 +13,49 @@ const OrderCard = ({ orderId, trangThaiDonHang, nhanHang }) => {
         return 'CHO_GIAO_HANG';
     };
 
-    // Fetch order details first
+    // Fetch order details and discounts
     useEffect(() => {
-        const fetchOrderDetails = async () => {
+        const fetchOrderAndDiscounts = async () => {
             try {
-                const response = await axiosClient.get(`/findByDonHangId?id=${orderId}`);
-                setOrderDetails(response.data);
+                const orderResponse = await axiosClient.get(`/findByDonHangId?id=${orderId}`);
+                setOrderDetails(orderResponse.data);
 
-                // Sau khi có order details, fetch chi tiết từng sản phẩm
-                const productPromises = response.data.map(item =>
+                const productPromises = orderResponse.data.map(item =>
                     axiosClient.get(`/chi_tiet_san_pham?id=${item.key.sanPhamID}`)
                 );
 
                 const productsData = await Promise.all(productPromises);
-                const products = productsData.map((response, index) => ({
-                    ...response.data,
-                    soLuong: response.data[index]?.soLuong
-                }));
+                const products = productsData.map(response => response.data);
 
+                // Fetch discount codes for each product's category
+                const discountPromises = products.map(product =>
+                    axiosClient.get(`/maDuocChon?danhmuc_id=${product.danhMucID}`)
+                );
+
+                const discountResponses = await Promise.all(discountPromises);
+                const discountMap = {};
+                discountResponses.forEach((response, index) => {
+                    if (response.data) {
+                        discountMap[products[index].danhMucID] = response.data;
+                    }
+                });
+
+                setDiscounts(discountMap);
                 setProductDetails(products);
             } catch (error) {
-                console.error('Lỗi khi lấy chi tiết đơn hàng:', error);
+                console.error('Lỗi khi lấy thông tin:', error);
             }
         };
-        fetchOrderDetails();
+        fetchOrderAndDiscounts();
     }, [orderId]);
+
+    const calculateDiscountedPrice = (price, danhMucID) => {
+        const discount = discounts[danhMucID];
+        if (discount && new Date(discount.ngayHetHan) > new Date() && discount.soLuotConLai > 0) {
+            return price * (1 - discount.phanTramGiamGia / 100);
+        }
+        return price;
+    };
 
     if (!orderDetails || !productDetails.length) return null;
 
@@ -91,7 +110,13 @@ const OrderCard = ({ orderId, trangThaiDonHang, nhanHang }) => {
                         <h4 className="order-card__title">{product.tenSanPham}</h4>
                         <div className="order-card__meta">
                             <div className="order-card__price">
-                                {product.gia.toLocaleString()}₫
+                                <span className="original-price">{product.gia.toLocaleString()}₫</span>
+                                {discounts[product.danhMucID] && (
+                                    <div className="discount-info">
+                                        <span className="discount-code">Mã: {discounts[product.danhMucID].ma}</span>
+                                        <span className="discount-percent">-{discounts[product.danhMucID].phanTramGiamGia}%</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="order-card__quantity">
@@ -107,9 +132,11 @@ const OrderCard = ({ orderId, trangThaiDonHang, nhanHang }) => {
             <div className="order-card__footer">
                 <div className="order-card__total">
                     Thành tiền: <span>
-                        {productDetails.reduce((total, product, index) =>
-                            total + (product.gia * (orderDetails[index]?.soLuong || 1)), 0
-                        ).toLocaleString()}₫
+                        {productDetails.reduce((total, product, index) => {
+                            const quantity = orderDetails[index]?.soLuong || 1;
+                            const discountedPrice = calculateDiscountedPrice(product.gia, product.danhMucID);
+                            return total + (discountedPrice * quantity);
+                        }, 0).toLocaleString()}₫
                     </span>
                 </div>
                 {trangThaiDonHang && !nhanHang && (

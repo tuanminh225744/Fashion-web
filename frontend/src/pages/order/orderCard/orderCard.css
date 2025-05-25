@@ -140,3 +140,25 @@
 .btn-danger:hover {
     background-color: #c82333;
 }
+
+.discount-info {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9rem;
+    color: #ee4d2d;
+    margin-top: 4px;
+}
+
+.discount-code {
+    font-weight: 500;
+}
+
+.discount-percent {
+    font-weight: bold;
+}
+
+.original-price {
+    color: var(--primary-color) !important;
+    text-decoration: none !important;
+    font-size: 0.9rem;
+}

@@ -296,3 +296,36 @@ table td:nth-child(4) {
     cursor: not-allowed;
     opacity: 0.5;
 }
+
+.discount-info {
+    margin-top: 4px;
+    font-size: 1.2rem;
+    color: #ee4d2d;
+    text-align: left;
+}
+
+.discount-code {
+    margin-right: 8px;
+    font-weight: 500;
+}
+
+.discount-percent {
+    font-weight: bold;
+}
+
+.price-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.original-price {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 1.2rem;
+}
+
+.discounted-price {
+    color: var(--primary-color);
+    font-weight: bold;
+    font-size: 1.4rem;
+}
