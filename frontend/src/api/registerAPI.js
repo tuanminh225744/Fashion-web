@@ -10,7 +10,7 @@ export const registerUser = async (user, dispatch, navigate) => {
         });
         dispatch(registerSuccess());
         // Navigate to verify page with email
-        navigate('/verify', { state: { email: user.email } });
+        navigate('/verifySignIn', { state: { email: user.email } });
     } catch (error) {
         dispatch(registerFailure());
         alert('Đăng ký thất bại!');
